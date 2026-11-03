@@ -1,0 +1,1 @@
+DROP TABLE schemas_version_check;
