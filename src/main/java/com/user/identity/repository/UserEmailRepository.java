@@ -8,11 +8,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface UserEmailRepository extends JpaRepository<UserEmail, UUID> {
+
     List<UserEmail> findAllByUserIdAndRetiredAtIsNull(UUID userId);
 
     Optional<UserEmail> findByNormalizedEmailAndRetiredAtIsNull(String normalizedEmail);
 
     Optional<UserEmail> findByUserIdAndPrimaryTrueAndRetiredAtIsNull(UUID userId);
+
+    Optional<UserEmail> findByIdAndUser_IdAndRetiredAtIsNull(UUID emailId, UUID userId);
 
     boolean existsByNormalizedEmailAndRetiredAtIsNull(String normalizedEmail);
 }
