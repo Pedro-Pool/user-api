@@ -3,6 +3,7 @@ package com.user.identity.entity;
 import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Locale;
 import java.util.UUID;
@@ -37,7 +38,19 @@ public class UserEmail {
     @Column(name = "retired_at")
     private Instant retiredAt;
 
+    @Transient
+    private Clock clock = Clock.systemUTC();
+
     protected UserEmail(){}
+
+    public UserEmail(User user, String email, Clock clock) {
+        this(user, email);
+
+        if (clock == null){
+            throw new IllegalArgumentException("Clock is required");
+        }
+        this.clock = clock;
+    }
 
     public UserEmail(User user, String email) {
         if(user == null){
@@ -57,13 +70,13 @@ public class UserEmail {
     }
     @PrePersist
     protected void onCrete(){
-        this.createdAt = Instant.now();
+        this.createdAt = Instant.now(clock);
     }
     public void verify(){
         ensureNotRetired();
 
         if(this.verifiedAt == null){
-            this.verifiedAt = Instant.now();
+            this.verifiedAt = Instant.now(clock);
         }
     }
     public void makePrimary(){
@@ -82,7 +95,7 @@ public class UserEmail {
             return;
         }
         this.primary = false;
-        this.retiredAt = Instant.now();
+        this.retiredAt = Instant.now(clock);
     }
 
     private void ensureNotRetired(){

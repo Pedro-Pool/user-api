@@ -4,6 +4,7 @@ package com.user.identity.entity;
 import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -35,13 +36,25 @@ public class EmailVerificationToken {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+    @Transient
+    private Clock clock = Clock.systemUTC();
+
     protected EmailVerificationToken() {
     }
-
     public EmailVerificationToken(
             UserEmail userEmail,
             byte[] tokenHash,
             Instant expiresAt
+    ){
+        this(userEmail, tokenHash, expiresAt, Clock.systemUTC());
+    }
+
+
+    public EmailVerificationToken(
+            UserEmail userEmail,
+            byte[] tokenHash,
+            Instant expiresAt,
+            Clock clock
     ) {
         if (userEmail == null) {
             throw new IllegalArgumentException("User email is required");
@@ -52,8 +65,11 @@ public class EmailVerificationToken {
                     "Token hash must contain exactly 32 bytes"
             );
         }
+        if (clock == null){
+            throw new IllegalArgumentException("Clock is required");
+        }
 
-        if (expiresAt == null || !expiresAt.isAfter(Instant.now())) {
+        if (expiresAt == null || !expiresAt.isAfter(Instant.now(clock))) {
             throw new IllegalArgumentException(
                     "Expiration must be in the future"
             );
@@ -62,11 +78,12 @@ public class EmailVerificationToken {
         this.userEmail = userEmail;
         this.tokenHash = tokenHash.clone();
         this.expiresAt = expiresAt;
+        this.clock = clock;
     }
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = Instant.now();
+        this.createdAt = Instant.now(clock);
     }
 
     public void consume() {
@@ -74,17 +91,17 @@ public class EmailVerificationToken {
             throw new IllegalStateException("Token is no longer active");
         }
 
-        this.usedAt = Instant.now();
+        this.usedAt = Instant.now(clock);
     }
 
     public void revoke() {
         if (usedAt == null && revokedAt == null) {
-            this.revokedAt = Instant.now();
+            this.revokedAt = Instant.now(clock);
         }
     }
 
     public boolean isExpired() {
-        return !Instant.now().isBefore(expiresAt);
+        return !Instant.now(clock).isBefore(expiresAt);
     }
 
     public boolean isActive() {
