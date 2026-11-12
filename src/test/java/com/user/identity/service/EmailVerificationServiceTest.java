@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class EmailVerificationServiceTest {
+class EmailVerificationServiceTest {
 
     @Mock
     private EmailVerificationTokenRepository tokenRepository;

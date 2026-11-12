@@ -10,7 +10,7 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-public class UserRepositoryTest extends AbstractPostgresTest {
+class UserRepositoryTest extends AbstractPostgresTest {
     @Autowired
     private UserRepository userRepository;
 

@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class UserCredentialRepositoryTest extends AbstractPostgresTest {
+class UserCredentialRepositoryTest extends AbstractPostgresTest {
 
     @Autowired
     private UserCredentialRepository credentialRepository;
