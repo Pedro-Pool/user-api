@@ -22,26 +22,26 @@ class PasswordConfigTest {
     void test_01(){
         String rawPassword = "StrongPassword@123";
 
-        String encodePassword = passwordEncoder.encode(rawPassword);
+        String encodedPassword = passwordEncoder.encode(rawPassword);
 
-        assertThat(encodePassword).isNotBlank().isNotEqualTo(rawPassword);
+        assertThat(encodedPassword).isNotBlank().isNotEqualTo(rawPassword);
     }
     @Test
     @DisplayName("Should match correct password")
     void test_02(){
         String rawPassword = "StrongPassword@123";
 
-        String encodePassword = passwordEncoder.encode(rawPassword);
+        String encodedPassword = passwordEncoder.encode(rawPassword);
 
-        assertThat(passwordEncoder.matches(rawPassword, encodePassword)).isTrue();
+        assertThat(passwordEncoder.matches(rawPassword, encodedPassword)).isTrue();
     }
     @Test
     @DisplayName("Should reject incorrect password")
     void test_03(){
         String rawPassword = "StrongPassword@123";
-        String encodePassword = passwordEncoder.encode(rawPassword);
+        String encodedPassword = passwordEncoder.encode(rawPassword);
 
-        assertThat(passwordEncoder.matches("wrongPassword123", encodePassword)).isFalse();
+        assertThat(passwordEncoder.matches("wrongPassword123", encodedPassword)).isFalse();
     }
     @Test
     @DisplayName("Should generate different hashes for same password")
@@ -58,8 +58,18 @@ class PasswordConfigTest {
     void test_05(){
         String rawPassword = "StrongPassword@123";
 
-        String encodePassword = passwordEncoder.encode(rawPassword);
+        String encodedPassword = passwordEncoder.encode(rawPassword);
 
-        assertThat(encodePassword).doesNotContain(rawPassword);
+        assertThat(encodedPassword).doesNotContain(rawPassword);
+    }
+    @Test
+    @DisplayName("Should generate different hashes for same password")
+    void test_06(){
+        String rawPassword = "StrongPassword@123" + "á界\uD83D\uDE00".repeat(30);
+
+        String encodedPassword = passwordEncoder.encode(rawPassword);
+
+        assertThat(encodedPassword).isNotBlank();
+        assertThat(passwordEncoder.matches(rawPassword, encodedPassword)).isTrue();
     }
 }

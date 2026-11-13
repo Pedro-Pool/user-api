@@ -6,12 +6,12 @@ import com.user.identity.entity.User;
 import com.user.identity.entity.UserCredential;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.PrePersist;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.Clock;
 import java.util.UUID;
@@ -49,7 +49,7 @@ class UserCredentialRepositoryTest extends AbstractPostgresTest {
         assertThat(persistCredential.getPasswordHash()).isEqualTo("encoded-password-hash");
     }
     @Test
-    @DisplayName("Should find create by user ID")
+    @DisplayName("Should find credential by user ID")
     void test_02(){
         User user = createUser();
 
@@ -85,7 +85,7 @@ class UserCredentialRepositoryTest extends AbstractPostgresTest {
 
         assertThatThrownBy(() ->
                 credentialRepository.saveAndFlush(secondCredential))
-                .isInstanceOf(RuntimeException.class);
+                .isInstanceOf(DataIntegrityViolationException.class);
     }
     @Test
     @DisplayName("Should cascade delete credential when user is deleted")
@@ -111,7 +111,7 @@ class UserCredentialRepositoryTest extends AbstractPostgresTest {
         userRepository.flush();
         entityManager.clear();
 
-        assertThat(credentialRepository.findById(user.getId())).isEmpty();
+        assertThat(credentialRepository.findById(userId)).isEmpty();
     }
 
     private User createUser(){

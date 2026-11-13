@@ -141,6 +141,37 @@ class UserCredentialTest {
 
         assertThat(credential.getPasswordExpiresAt()).isNull();
     }
+    @Test
+    @DisplayName("Should reject null clock")
+    void test_09(){
+        assertThatThrownBy(() ->
+                new UserCredential(user, "encode-hash", null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Clock is required");
+    }
+    @Test
+    @DisplayName("Should reject null clock")
+    void test_10(){
+        UserCredential credential = new UserCredential(user, "old-password-hash", clock);
+
+        assertThatThrownBy(() ->
+                credential.changePassword(null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Invalid password hash");
+
+        assertThatThrownBy(() ->
+                credential.changePassword("   "))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Invalid password hash");
+
+        assertThatThrownBy(() ->
+                credential.changePassword("null".repeat(153)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Invalid password hash");
+
+        assertThat(credential.getPasswordHash()).isEqualTo("old-password-hash");
+        assertThat(credential.getPasswordChangedAt()).isEqualTo(initialInstant);
+    }
 
     private static class MutableClock extends Clock {
 

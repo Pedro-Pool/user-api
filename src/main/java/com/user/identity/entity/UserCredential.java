@@ -45,9 +45,7 @@ public class UserCredential {
         if (user == null){
             throw new IllegalArgumentException("User is required");
         }
-        if (passwordHash == null || passwordHash.isBlank() || passwordHash.length() > 512){
-            throw new IllegalArgumentException("Invalid password hash");
-        }
+        validatePasswordHash(passwordHash);
         if (clock == null){
             throw new IllegalArgumentException("Clock is required");
         }
@@ -71,11 +69,8 @@ public class UserCredential {
     }
 
     public void changePassword(String newPasswordHash){
-        if (newPasswordHash == null
-        || newPasswordHash.isBlank()
-        || newPasswordHash.length() > 512){
-            throw new IllegalArgumentException("Invalid password hash");
-        }
+        validatePasswordHash(newPasswordHash);
+
         this.passwordHash = newPasswordHash;
         this.passwordChangedAt = Instant.now(clock);
         this.mustChangePassword = false;
@@ -89,6 +84,12 @@ public class UserCredential {
             throw new IllegalArgumentException("Password expiration must be in the future");
         }
         this.passwordExpiresAt = expiration;
+    }
+
+    private void validatePasswordHash(String passwordHash){
+        if (passwordHash == null || passwordHash.isBlank() || passwordHash.length() > 512){
+            throw new IllegalArgumentException("Invalid password hash");
+        }
     }
 
     public UUID getId() {
@@ -121,9 +122,5 @@ public class UserCredential {
 
     public Instant getUpdatedAt() {
         return updatedAt;
-    }
-
-    public Clock getClock() {
-        return clock;
     }
 }
