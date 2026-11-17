@@ -1,5 +1,6 @@
 package com.user.identity.validation.password;
 
+import com.user.identity.validation.ValidationResult;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +34,7 @@ class PasswordValidationResultTest {
     void test_03(){
         assertThatThrownBy(() ->
                 new PasswordValidationResult(
-                        true, List.of("Invalid password")
+                        new ValidationResult(true, List.of("Invalid password"))
                 )).isInstanceOf(IllegalArgumentException.class);
     }
     @Test
@@ -41,7 +42,7 @@ class PasswordValidationResultTest {
     void test_04(){
         assertThatThrownBy(() ->
                 new PasswordValidationResult(
-                        false, List.of()
+                        new ValidationResult(false, List.of())
                 )).isInstanceOf(IllegalArgumentException.class);
     }
     @Test
@@ -49,7 +50,7 @@ class PasswordValidationResultTest {
     void test_05(){
         assertThatThrownBy(() ->
                 new PasswordValidationResult(
-                        false, null
+                        new ValidationResult(false, null)
                 )).isInstanceOf(NullPointerException.class);
     }
     @Test

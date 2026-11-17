@@ -1,29 +1,28 @@
 package com.user.identity.validation.password;
 
+import com.user.identity.validation.ValidationResult;
+
 import java.util.List;
 
-public record PasswordValidationResult(boolean valid, List<String> errors) {
+public record PasswordValidationResult(ValidationResult result) {
     public PasswordValidationResult{
-        errors = List.copyOf(errors);
-
-        if (valid && !errors.isEmpty()){
+        if (result == null){
             throw new IllegalArgumentException(
-                    "A valid password cannot contain validation errors"
-            );
-        }
-        if (!valid && errors.isEmpty()){
-            throw new IllegalArgumentException(
-                    "A invalid password must contain validation errors"
+                    "Validation result is required"
             );
         }
     }
+    public boolean valid(){
+        return result.valid();
+    }
+    public List<String> errors(){
+        return result.errors();
+    }
+
     public static PasswordValidationResult success(){
-        return new PasswordValidationResult(true, List.of());
+        return new PasswordValidationResult(ValidationResult.success());
     }
     public static PasswordValidationResult failure(List<String> errors){
-        if (errors == null || errors.isEmpty()){
-            throw new IllegalArgumentException("Validation errors are required");
-        }
-        return new PasswordValidationResult(false, errors);
+        return new PasswordValidationResult(ValidationResult.failure(errors));
     }
 }

@@ -12,7 +12,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     Optional<User> findByIdAndDeletedAtIsNull(UUID id);
 
-    List<User> findAllByStatus(UserStatus status);
+    List<User> findAllByStatusAndDeletedAtIsNull(UserStatus status);
 
     List<User> findAllByDeletedAtIsNull();
 
