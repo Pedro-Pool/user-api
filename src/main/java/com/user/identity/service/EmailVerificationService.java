@@ -30,12 +30,17 @@ public class EmailVerificationService {
     }
 
     @Transactional
-    public String createToken(UserEmail userEmail){
+    public EmailVerificationChallenge createToken(UserEmail userEmail){
         if (userEmail == null){
             throw new IllegalArgumentException("User email is required");
         }
-        byte[] rawToken = generateRawToken();
+        tokenRepository
+                .findAllByUserEmail_IdAndUsedAtIsNullAndRevokedAtIsNull(userEmail.getId())
+                .forEach(EmailVerificationToken::revoke);
 
+        tokenRepository.flush();
+
+        byte[] rawToken = generateRawToken();
         byte[] tokenHash = hashToken(rawToken);
 
         Instant expiresAt = Instant.now(clock).plusSeconds(900);
@@ -48,7 +53,11 @@ public class EmailVerificationService {
         );
         tokenRepository.save(token);
 
-        return encodeToken(rawToken);
+        return new EmailVerificationChallenge(
+                userEmail.getId(),
+                encodeToken(rawToken),
+                expiresAt
+        );
     }
     @Transactional
     public void verifyToken(String encodedToken){

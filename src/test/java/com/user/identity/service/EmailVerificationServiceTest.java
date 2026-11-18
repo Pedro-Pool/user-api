@@ -19,6 +19,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,7 +48,8 @@ class EmailVerificationServiceTest {
     void test_01(){
         UserEmail userEmail = createUserEmail();
 
-        String rawToken = service.createToken(userEmail);
+        EmailVerificationChallenge challenge = service.createToken(userEmail);
+        String rawToken = challenge.rawToken();
 
         assertThat(rawToken).hasSize(43).matches("[A-Za-z0-9_-]{43}");
 
@@ -60,7 +62,8 @@ class EmailVerificationServiceTest {
     void test_02() throws Exception{
         UserEmail userEmail = createUserEmail();
 
-        String encodedToken = service.createToken(userEmail);
+        EmailVerificationChallenge challenge = service.createToken(userEmail);
+        String encodedToken = challenge.rawToken();
 
         byte[] rawToken = Base64.getUrlDecoder().decode(encodedToken);
 
@@ -217,6 +220,30 @@ class EmailVerificationServiceTest {
                 .hasMessage("Invalid or expired token");
 
         verify(tokenRepository).findByTokenHashAndUsedAtIsNullAndRevokedAtIsNull(tokenHash);
+    }
+    @Test
+    @DisplayName("Should revoke previous active tokens when creating a new token")
+    void test_09(){
+        UserEmail userEmail = createUserEmail();
+
+        EmailVerificationToken previousToken = new EmailVerificationToken(
+                userEmail,
+                new byte[32],
+                fixedInstant.plusSeconds(900),
+                Clock.fixed(fixedInstant, ZoneOffset.UTC)
+        );
+
+        when(tokenRepository
+                .findAllByUserEmail_IdAndUsedAtIsNullAndRevokedAtIsNull(userEmail.getId()))
+                .thenReturn(List.of(previousToken));
+
+        service.createToken(userEmail);
+
+        assertThat(previousToken.getRevokedAt()).isEqualTo(fixedInstant);
+
+        verify(tokenRepository).findAllByUserEmail_IdAndUsedAtIsNullAndRevokedAtIsNull(userEmail.getId());
+        verify(tokenRepository).flush();
+        verify(tokenRepository).save(any(EmailVerificationToken.class));
     }
 
     private UserEmail createUserEmail() {

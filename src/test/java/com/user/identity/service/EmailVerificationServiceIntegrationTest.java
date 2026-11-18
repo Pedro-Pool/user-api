@@ -62,7 +62,8 @@ class EmailVerificationServiceIntegrationTest extends AbstractPostgresTest {
                 )
         );
 
-        String rawToken = verificationService.createToken(userEmail);
+        EmailVerificationChallenge challenge = verificationService.createToken(userEmail);
+        String rawToken = challenge.rawToken();
 
         byte[] tokenHash = MessageDigest.getInstance("SHA-256")
                 .digest(Base64.getUrlDecoder().decode(rawToken));

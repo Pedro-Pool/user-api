@@ -69,7 +69,7 @@ public class UserEmail {
         return email.trim().toLowerCase(Locale.ROOT);
     }
     @PrePersist
-    protected void onCrete(){
+    protected void onCreate(){
         this.createdAt = Instant.now(clock);
     }
     public void verify(){

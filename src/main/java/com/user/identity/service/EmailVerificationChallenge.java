@@ -5,7 +5,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record EmailVerificationChallenge(
-        UUID emailID,
+        UUID emailId,
         String rawToken,
         Instant expiresAt
 ) {
