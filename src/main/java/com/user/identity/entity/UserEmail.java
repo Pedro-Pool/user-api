@@ -59,6 +59,9 @@ public class UserEmail {
         if(email == null || email.isBlank()){
             throw new IllegalArgumentException("Email is required");
         }
+        if (email.trim().length() > 254){
+            throw new IllegalArgumentException("Email must not exceed 254 characters");
+        }
 
         this.user = user;
         this.email = email.trim();

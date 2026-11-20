@@ -1,6 +1,8 @@
 package com.user.identity.repository;
 
 import com.user.identity.entity.UserEmail;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -9,7 +11,7 @@ import java.util.UUID;
 
 public interface UserEmailRepository extends JpaRepository<UserEmail, UUID> {
 
-    List<UserEmail> findAllByUserIdAndRetiredAtIsNull(UUID userId);
+    Page<UserEmail> findAllByUserIdAndRetiredAtIsNull(UUID userId, Pageable pageable);
 
     Optional<UserEmail> findByNormalizedEmailAndRetiredAtIsNull(String normalizedEmail);
 

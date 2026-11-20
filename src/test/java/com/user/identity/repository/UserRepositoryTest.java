@@ -7,8 +7,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -89,12 +91,19 @@ class UserRepositoryTest extends AbstractPostgresTest {
 
         userRepository.flush();
 
-        List<User> users = userRepository.findAllByDeletedAtIsNull();
+        Pageable pageable = PageRequest.of(0, 20);
 
-        assertThat(users)
+        Page<User> users = userRepository.findAllByDeletedAtIsNull(pageable);
+
+        assertThat(users.getContent())
                 .hasSize(2)
                 .extracting(User::getDisplayName)
                 .containsExactlyInAnyOrder("Pedro", "João");
+
+        assertThat(users.getTotalElements()).isEqualTo(2);
+        assertThat(users.getTotalPages()).isEqualTo(1);
+        assertThat(users.getNumber()).isZero();
+        assertThat(users.getSize()).isEqualTo(20);
     }
     @Test
     @DisplayName("Should verify existence only for users that are not logically deleted")
@@ -135,9 +144,11 @@ class UserRepositoryTest extends AbstractPostgresTest {
 
         userRepository.flush();
 
-        List<User> users = userRepository.findAllByStatusAndDeletedAtIsNull(UserStatus.ACTIVE);
+        Pageable pageable = PageRequest.of(0, 20);
 
-        assertThat(users)
+        Page<User> users = userRepository.findAllByStatusAndDeletedAtIsNull(UserStatus.ACTIVE, pageable);
+
+        assertThat(users.getContent())
                 .hasSize(2)
                 .extracting(User::getDisplayName)
                 .containsExactlyInAnyOrder("Pedro", "João");
